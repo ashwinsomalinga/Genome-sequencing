@@ -1,0 +1,15 @@
+def genome_path(strings):
+    # initialize the result string with the first string
+    result = strings[0]
+
+    # add the last character of each subsequent string to the result
+    for i in range(1, len(strings)):
+        result += strings[i][-1]
+
+    return result
+
+# read in the input strings and split them by whitespace
+strings = input().split()
+
+result = genome_path(strings)
+print(result)
