@@ -1,0 +1,22 @@
+def overlap_graph(patterns):
+    # create an empty dictionary to store the graph
+    graph = {}
+    # loop through each pattern
+    for pattern in patterns:
+        # add the pattern to the graph if it's not already present
+        if pattern not in graph:
+            graph[pattern] = []
+
+        # loop through all other patterns
+        for other in patterns:
+            # if the other pattern overlaps with the current pattern, add it to the adjacency list
+            if other != pattern and other.startswith(pattern[1:]):
+                graph[pattern].append(other)
+    return graph
+# read in the input patterns and split them by whitespace
+patterns = input().split()
+result = overlap_graph(patterns)
+# print the graph as an adjacency list
+for node, edges in result.items():
+    if edges:
+        print(node + ":" + " ".join(edges))
