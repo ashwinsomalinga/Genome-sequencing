@@ -1,0 +1,11 @@
+def composition(k, text):
+    result = ""
+    for i in range(len(text)-k+1):
+        k_mer = text[i:i+k]
+        result += k_mer + " "
+    return result.strip()
+
+k = int(input())
+text = input()
+result = composition(k, text)
+print(result)
