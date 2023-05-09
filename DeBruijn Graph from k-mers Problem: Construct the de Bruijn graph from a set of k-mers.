@@ -1,0 +1,16 @@
+def DeBruijnFromKmers(kmers):
+    graph = {}
+    for kmer in kmers:
+        prefix = kmer[:-1]
+        suffix = kmer[1:]
+        if prefix not in graph:
+            graph[prefix] = [suffix]
+        else:
+            graph[prefix].append(suffix)
+    return graph
+
+kmers = input("Enter the k-mers separated by space: ").split()
+graph = DeBruijnFromKmers(kmers)
+for node in sorted(graph):
+    print("{}: {}".format(node, " ".join(sorted(graph[node]))))
+    
