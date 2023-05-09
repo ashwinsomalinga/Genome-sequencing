@@ -1,0 +1,21 @@
+def DeBruijnKmers(k, Text):
+    kmers = []
+    for i in range(len(Text)-k+1):
+        kmers.append(Text[i:i+k])
+
+    adj_list = {}
+    for kmer in kmers:
+        prefix = kmer[:-1]
+        suffix = kmer[1:]
+        if prefix in adj_list:
+            adj_list[prefix].append(suffix)
+        else:
+            adj_list[prefix] = [suffix]
+
+    return adj_list
+
+k = 4
+Text = "AAGATTCTCTAAGA"
+result = DeBruijnKmers(k, Text)
+for node in result:
+    print(node + ":" + " ".join(result[node]))
