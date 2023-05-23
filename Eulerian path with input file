@@ -1,0 +1,40 @@
+def eulerian_cycle(graph):
+    # Initialize an empty stack and path
+    stack = []
+    path = []
+
+    # Start with a random vertex
+    start_vertex = next(iter(graph.keys()))
+    stack.append(start_vertex)
+
+    while stack:
+        current_vertex = stack[-1]
+
+        if graph[current_vertex]:
+            # Choose the next unvisited neighbor
+            next_vertex = graph[current_vertex].pop(0)
+            stack.append(next_vertex)
+        else:
+            # If all neighbors are visited, backtrack
+            path.append(stack.pop())
+
+    # Reverse the path to get the Eulerian cycle
+    path.reverse()
+    return path
+
+
+# Get input file name from the user
+file_name = input("Enter the input file name: ")
+
+# Read the input file
+adjacency_list = {}
+try:
+    with open(file_name, 'r') as file:
+        for line in file:
+            vertex, neighbors = line.strip().split(":")
+            adjacency_list[int(vertex)] = [int(neighbor) for neighbor in neighbors.split()]
+except FileNotFoundError:
+    print("File not found. Please check the file name and try again.")
+
+cycle = eulerian_cycle(adjacency_list)
+print(" ".join(str(vertex) for vertex in cycle))
