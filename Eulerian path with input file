@@ -38,3 +38,37 @@ except FileNotFoundError:
 
 cycle = eulerian_cycle(adjacency_list)
 print(" ".join(str(vertex) for vertex in cycle))
+
+#explanation below
+Certainly! Let's go through the code step by step, explaining each part in detail:
+
+1. Function `eulerian_cycle`:
+   - This function takes an adjacency list representing a directed graph as input and returns an Eulerian cycle.
+   - It uses a stack to keep track of the vertices visited and a path to store the Eulerian cycle.
+   - The function follows Hierholzer's algorithm to find the Eulerian cycle.
+   - It starts with a random vertex and iteratively explores the neighbors until all vertices are visited.
+   - If a vertex has unvisited neighbors, it chooses one and adds it to the stack.
+   - If all neighbors are visited, it backtracks and adds the vertex to the path.
+   - Finally, it reverses the path to obtain the Eulerian cycle and returns it.
+
+2. Input from text file:
+   - The program prompts the user to enter the input file name where the adjacency list is stored.
+   - The file should contain lines in the format "vertex: neighbors".
+   - The program attempts to open the file and read its contents.
+
+3. Reading the adjacency list:
+   - An empty dictionary `adjacency_list` is created to store the graph.
+   - The program reads each line from the file.
+   - For each line, it splits the line at the colon (":") to separate the vertex from its neighbors.
+   - The vertex is converted to an integer, and the neighbors are split by spaces and converted to integers as well.
+   - The resulting data is stored in the `adjacency_list` dictionary.
+
+4. Finding the Eulerian cycle:
+   - The `eulerian_cycle` function is called with the `adjacency_list`.
+   - The function uses the adjacency list to find the Eulerian cycle in the graph.
+
+5. Printing the Eulerian cycle:
+   - The Eulerian cycle is stored in the `cycle` variable.
+   - The program prints the Eulerian cycle by joining the vertices with spaces and converting them to strings.
+
+By using a text file as input, you can provide the adjacency list in the specified format, and the program will read the file, find the Eulerian cycle using the `eulerian_cycle` function, and print the resulting cycle.
