@@ -1,0 +1,36 @@
+def string_spelled_by_gapped_patterns(k, d, patterns):
+    # Extract prefixes and suffixes from the patterns
+    prefix_string = [pattern.split('|')[0] for pattern in patterns]
+    suffix_string = [pattern.split('|')[1] for pattern in patterns]
+
+    # Reconstruct the prefix and suffix strings
+    prefix = reconstruct_string_from_patterns(prefix_string)
+    suffix = reconstruct_string_from_patterns(suffix_string)
+
+    # Check if a string spelled by the gapped patterns exists
+    for i in range(k + d + 1, len(prefix)):
+        if prefix[i] != suffix[i - k - d]:
+            return "No string spelled by the gapped patterns exists."
+
+    # Concatenate the prefix and suffix strings
+    return prefix + suffix[-(k + d):]
+
+def reconstruct_string_from_patterns(patterns):
+    # Reconstruct a string from a list of patterns
+    reconstructed_string = patterns[0]
+    for pattern in patterns[1:]:
+        reconstructed_string += pattern[-1]
+    return reconstructed_string
+
+# Ask for input from the user
+k = int(input("Enter the value of k: "))
+d = int(input("Enter the value of d: "))
+
+patterns_input = input("Enter the patterns in the format 'prefix|suffix', separated by spaces: ")
+patterns = patterns_input.split()
+
+# Call the function to get the result
+result = string_spelled_by_gapped_patterns(k, d, patterns)
+
+# Print the result
+print(result)
