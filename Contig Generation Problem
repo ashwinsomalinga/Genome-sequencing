@@ -1,0 +1,76 @@
+from collections import defaultdict
+
+def generate_contigs(patterns):
+    graph = construct_de_bruijn_graph(patterns)
+    paths = find_maximal_non_branching_paths(graph)
+    contigs = []
+    
+    for path in paths:
+        contig = reconstruct_contig(path)
+        contigs.append(contig)
+    
+    contigs.sort()  # Sort the contigs in chronological order
+    
+    return contigs
+
+def construct_de_bruijn_graph(patterns):
+    graph = defaultdict(list)
+    
+    for pattern in patterns:
+        prefix = pattern[:-1]
+        suffix = pattern[1:]
+        graph[prefix].append(suffix)
+    
+    return graph
+
+def find_maximal_non_branching_paths(graph):
+    in_degrees, out_degrees = compute_degrees(graph)
+    paths = []
+    
+    for node in graph:
+        if out_degrees[node] != 1 or in_degrees[node] != 1:
+            if out_degrees[node] > 0:
+                for outgoing in graph[node]:
+                    path = [node, outgoing]
+                    while out_degrees[outgoing] == 1 and in_degrees[outgoing] == 1:
+                        outgoing = graph[outgoing][0]
+                        path.append(outgoing)
+                    paths.append(path)
+    
+    for node in graph:
+        if out_degrees[node] == 0 and in_degrees[node] == 1:
+            path = [node]
+            outgoing = graph[node][0]
+            while out_degrees[outgoing] == 1 and in_degrees[outgoing] == 1:
+                path.append(outgoing)
+                outgoing = graph[outgoing][0]
+            paths.append(path)
+    
+    return paths
+
+def compute_degrees(graph):
+    in_degrees = defaultdict(int)
+    out_degrees = defaultdict(int)
+    
+    for node in graph:
+        out_degrees[node] = len(graph[node])
+        for neighbor in graph[node]:
+            in_degrees[neighbor] += 1
+    
+    return in_degrees, out_degrees
+
+def reconstruct_contig(path):
+    contig = path[0]
+    
+    for node in path[1:]:
+        contig += node[-1]
+    
+    return contig
+
+# Accept input from the user
+input_str = input("Enter the collection of k-mers (separated by spaces): ")
+patterns = input_str.split()
+
+contigs = generate_contigs(patterns)
+output = " ".join(contigs)
+print(output)
