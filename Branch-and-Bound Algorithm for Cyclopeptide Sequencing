@@ -1,0 +1,22 @@
+def get_subpeptide_counts_linear(n):
+    """
+    Calculates the number of subpeptides for a linear peptide of length n.
+    
+    Args:
+        n (int): Length of the linear peptide.
+    
+    Returns:
+        int: Number of subpeptides.
+    """
+    return (n * (n + 1)) // 2 + 1
+
+# Example usage
+input_length = 4
+output = get_subpeptide_counts_linear(input_length)
+print(output)
+
+
+#detailed explanation
+The get_subpeptide_counts_linear function takes an integer n as input, which represents the length of the linear peptide. It then calculates the number of subpeptides using the formula (n * (n + 1)) // 2 + 1. The additional + 1 is to account for the empty peptide.
+
+In the main part of the code, an example input length of 4 is provided. The get_subpeptide_counts_linear function is called with this input, and the result is stored in the output variable. Finally, the output is printed, which gives the number of subpeptides for the given linear peptide length.
