@@ -1,0 +1,58 @@
+Alphabet = {
+    57: 'G', 71: 'A', 87: 'S', 97: 'P',
+    99: 'V', 101: 'T', 103: 'C', 113: 'I/L',
+    114: 'N', 115: 'D', 128: 'K/Q', 129: 'E',
+    131: 'M', 137: 'H', 147: 'F', 156: 'R',
+    163: 'Y', 186: 'W'
+}
+
+def CountingMass(Mass, masslist):
+    """
+    Counts the number of combinations that result in the given Mass using the provided masslist.
+    
+    Args:
+        Mass (int): The target mass to achieve.
+        masslist (dict): A dictionary containing previously calculated masses and their combinations.
+    
+    Returns:
+        int: The number of combinations that result in the given Mass.
+        dict: The updated masslist with newly calculated masses and combinations.
+    """
+    # Base cases:
+    if Mass == 0:
+        return 1, masslist  # Found a valid combination
+    if Mass < 57:
+        return 0, masslist  # Invalid combination
+    
+    if Mass in masslist:
+        return masslist[Mass], masslist  # Return the pre-calculated result if available
+    
+    n = 0  # Variable to store the total number of combinations
+    
+    # Calculate the number of combinations for each element in the Alphabet
+    for i in Alphabet:
+        k, masslist = CountingMass(Mass - i, masslist)
+        n += k
+    
+    masslist[Mass] = n  # Store the calculated result in the masslist for future use
+    
+    return n, masslist
+
+target_mass = 1462
+mass_combinations = {}  # Empty dictionary to store the calculated masses and combinations
+result = CountingMass(target_mass, mass_combinations)[0]
+print(result)
+
+#detailed explanation
+In this code, we have an Alphabet dictionary that maps mass values to corresponding letters. The CountingMass function takes a target mass and a dictionary masslist as input and returns the number of combinations that result in the target mass. The masslist dictionary stores previously calculated masses and their combinations to avoid redundant computations.
+
+The function uses recursion to calculate the combinations. It has several base cases:
+
+If the target mass is 0, it means we have found a valid combination. So, it returns 1 and the masslist unchanged.
+If the target mass is less than 57, it is not possible to form a valid combination. So, it returns 0 and the masslist unchanged.
+If the target mass is already present in the masslist, it means we have already calculated the number of combinations for that mass. So, it returns the pre-calculated result and the masslist unchanged.
+If none of the base cases apply, the function iterates over each mass value in the Alphabet dictionary. For each mass value i, it recursively calls CountingMass with the reduced target mass (Mass - i) and the same masslist. The returned number of combinations k is added to the total n.
+
+After iterating over all the mass values, the total number of combinations n is stored in the masslist dictionary for the current target mass. Finally, the function returns the total number of combinations n and the updated masslist.
+
+In the main part of the code, we define a target_mass variable and an empty dictionary mass_combinations to store the calculated masses and combinations. We then call the CountingMass function with the target_mass and mass_combinations as arguments, and retrieve the number of combinations result from the returned tuple. Finally, we print the result.
