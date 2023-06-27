@@ -1,0 +1,33 @@
+def LinearSpectrum(Peptide, Alphabet, AminoAcidMass):
+    # Initialize a list to store the prefix masses of the amino acid string
+    PrefixMass = [0]
+
+    # Calculate the prefix mass for each amino acid in the peptide
+    for i in range(1, len(Peptide) + 1):
+        for symbol in Alphabet:
+            if symbol == Peptide[i - 1]:
+                # Add the mass of the current amino acid to the previous prefix mass
+                PrefixMass.append(PrefixMass[i - 1] + AminoAcidMass[symbol])
+    
+    # Initialize the linear spectrum with a single mass value of 0
+    LinearSpectrum = [0]
+
+    # Generate all possible subpeptides by taking the differences between prefix masses
+    for i in range(len(Peptide)):
+        for j in range(i + 1, len(Peptide) + 1):
+            # Add the difference in prefix masses to the linear spectrum
+            LinearSpectrum.append(PrefixMass[j] - PrefixMass[i])
+    
+    # Sort the linear spectrum in ascending order
+    LinearSpectrum.sort()
+
+    return LinearSpectrum
+
+
+Alphabet = ['G', 'A', 'S', 'P', 'V', 'T', 'C', 'I', 'L', 'N', 'D', 'K', 'Q', 'E', 'M', 'H', 'F', 'R', 'Y', 'W']
+AminoAcidMass = {'G': 57, 'A': 71, 'S': 87, 'P': 97, 'V': 99, 'T': 101, 'C': 103, 'I': 113, 'L': 113, 'N': 114,
+                 'D': 115, 'K': 128, 'Q': 128, 'E': 129, 'M': 131, 'H': 137, 'F': 147, 'R': 156, 'Y': 163, 'W': 186}
+
+Peptide = "LEWNWENNTEDYGTNQVDLIHFKMRESVTTDDRRH"
+result = LinearSpectrum(Peptide, Alphabet, AminoAcidMass)
+print(" ".join(map(str, result)))
