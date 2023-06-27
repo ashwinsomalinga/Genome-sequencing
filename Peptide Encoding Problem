@@ -1,0 +1,100 @@
+def reverse_complement(pattern):
+    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+    return ''.join(complement[base] for base in reversed(pattern))
+
+def transcribe(dna):
+    rna = dna.replace('T', 'U')
+    return rna
+
+def translate(rna, genetic_code):
+    protein = ""
+    for i in range(0, len(rna), 3):
+        codon = rna[i:i+3]
+        amino_acid = genetic_code.get(codon, '')
+        if amino_acid == '':
+            return ''
+        protein += amino_acid
+    return protein
+
+def find_encoding_substrings(text, peptide, genetic_code):
+    substrings = []
+    k = len(peptide) * 3
+    for i in range(len(text) - k + 1):
+        pattern = text[i:i+k]
+        reverse_pattern = reverse_complement(pattern)
+        rna = transcribe(pattern)
+        reverse_rna = transcribe(reverse_pattern)
+        if translate(rna, genetic_code) == peptide:
+            substrings.append(pattern)
+        if translate(reverse_rna, genetic_code) == peptide:
+            substrings.append(pattern)
+
+    # Sort the substrings based on their appearance in the original DNA string text
+    sorted_substrings = sorted(substrings, key=lambda x: text.index(x))
+    return sorted_substrings
+
+# Take input from the user
+text = input("Enter the DNA string: ")
+peptide = input("Enter the amino acid sequence: ")
+
+# Define the genetic code
+genetic_code = {
+    'AAA': 'K', 'AAC': 'N', 'AAG': 'K', 'AAU': 'N',
+    'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACU': 'T',
+    'AGA': 'R', 'AGC': 'S', 'AGG': 'R', 'AGU': 'S',
+    'AUA': 'I', 'AUC': 'I', 'AUG': 'M', 'AUU': 'I',
+    'CAA': 'Q', 'CAC': 'H', 'CAG': 'Q', 'CAU': 'H',
+    'CCA': 'P', 'CCC': 'P', 'CCG': 'P', 'CCU': 'P',
+    'CGA': 'R', 'CGC': 'R', 'CGG': 'R', 'CGU': 'R',
+    'CUA': 'L', 'CUC': 'L', 'CUG': 'L', 'CUU': 'L',
+    'GAA': 'E', 'GAC': 'D', 'GAG': 'E', 'GAU': 'D',
+    'GCA': 'A', 'GCC': 'A', 'GCG': 'A', 'GCU': 'A',
+    'GGA': 'G', 'GGC': 'G', 'GGG': 'G', 'GGU': 'G',
+    'GUA': 'V', 'GUC': 'V', 'GUG': 'V', 'GUU': 'V',
+    'UAA': '', 'UAC': 'Y', 'UAG': '', 'UAU': 'Y',
+    'UCA': 'S', 'UCC': 'S', 'UCG': 'S', 'UCU': 'S',
+    'UGA': '', 'UGC': 'C', 'UGG': 'W', 'UGU': 'C',
+    'UUA': 'L', 'UUC': 'F', 'UUG': 'L', 'UUU': 'F'
+}
+
+# Find encoding substrings
+encoding_substrings = find_encoding_substrings(text, peptide, genetic_code)
+
+# Print the result
+for substring in encoding_substrings:
+    print(substring)
+
+#detialed explanation
+  Certainly! Let's go through the code step by step:
+
+1. The `reverse_complement` function takes a DNA pattern as input and returns its reverse complement. It uses a dictionary to map each nucleotide to its complement, and then reverses the pattern.
+
+2. The `transcribe` function takes a DNA sequence and replaces all occurrences of 'T' with 'U' to convert it into an RNA sequence.
+
+3. The `translate` function takes an RNA sequence and a genetic code dictionary as input. It translates the RNA sequence into an amino acid sequence by dividing it into codons (groups of three nucleotides) and using the genetic code to determine the corresponding amino acid for each codon. It returns the translated protein sequence.
+
+4. The `find_encoding_substrings` function takes a DNA string (`text`), an amino acid sequence (`peptide`), and a genetic code dictionary as input. It searches for all substrings of the DNA string that encode the given amino acid sequence.
+
+5. Inside the `find_encoding_substrings` function, we initialize an empty list called `substrings` to store the encoding substrings.
+
+6. We calculate the length of the peptide in terms of nucleotides by multiplying the length of the peptide by 3 (since each amino acid is encoded by a codon consisting of three nucleotides).
+
+7. We iterate through the DNA string using a sliding window approach. For each window of length `k`, we extract the pattern and its reverse complement.
+
+8. We transcribe both the pattern and the reverse complement to obtain their corresponding RNA sequences.
+
+9. We use the `translate` function to check if the translated protein sequence of the pattern or the reverse complement matches the given peptide sequence. If there is a match, we append the pattern to the `substrings` list.
+
+10. After iterating through all possible windows, we need to sort the `substrings` list based on their appearance in the original DNA string. To achieve this, we create a new list called `sorted_substrings` and only include substrings that are present in the original DNA string (by checking if they are in the `text`). We use the `sorted` function with a lambda function as the key parameter to sort the substrings based on their index in the original DNA string.
+
+11. Finally, we return the `sorted_substrings`, which contains the encoding substrings in the order they appear in the original DNA string.
+
+12. The main part of the code takes user input for the DNA string and the amino acid sequence.
+
+13. It defines the genetic code dictionary, which maps RNA codons to amino acids.
+
+14. It calls the `find_encoding_substrings` function with the provided inputs and the genetic code.
+
+15. It iterates through the `encoding_substrings` list and prints each substring.
+
+By following this step-by-step explanation, you should have a clear understanding of how the code works to find encoding substrings of a DNA sequence for a given amino acid sequence.
