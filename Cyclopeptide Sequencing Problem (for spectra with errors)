@@ -1,0 +1,80 @@
+mass_table = {
+    'G': 57,
+    'A': 71,
+    'S': 87,
+    'P': 97,
+    'V': 99,
+    'T': 101,
+    'C': 103,
+    'I': 113,
+    'L': 113,
+    'N': 114,
+    'D': 115,
+    'K': 128,
+    'Q': 128,
+    'E': 129,
+    'M': 131,
+    'H': 137,
+    'F': 147,
+    'R': 156,
+    'Y': 163,
+    'W': 186
+}
+
+def cyclospectrum(peptide):
+    """
+    Calculates the cyclic spectrum of a given peptide.
+
+    Args:
+        peptide (str): The peptide sequence.
+
+    Returns:
+        list: The sorted cyclic spectrum as a list of integers.
+    """
+    prefix_masses = [0]
+    for i in range(len(peptide)):
+        prefix_masses.append(prefix_masses[i] + mass_table[peptide[i]])
+    peptide_mass = prefix_masses[-1]
+    cyclospec = [0]
+    for i in range(len(prefix_masses)-1):
+        for j in range(i+1, len(prefix_masses)):
+            cyclospec.append(prefix_masses[j] - prefix_masses[i])
+            if i > 0 and j < len(prefix_masses)-1:
+                cyclospec.append(peptide_mass - (prefix_masses[j] - prefix_masses[i]))
+    cyclospec.sort()
+    return cyclospec
+
+def cyclopeptide_scoring(peptide, spectrum):
+    """
+    Calculates the score of a peptide against a given spectrum.
+
+    Args:
+        peptide (str): The peptide sequence.
+        spectrum (list): The spectrum as a list of integers.
+
+    Returns:
+        int: The score of the peptide.
+    """
+    cyclospec = cyclospectrum(peptide)
+    spec_copy = list(map(int, spectrum))
+    score = 0
+    for mass in cyclospec:
+        if mass in spec_copy:
+            score += 1
+            spec_copy.remove(mass)
+    return score
+
+# Test the function
+peptide = input("Enter the peptide: ")
+spectrum = input("Enter the spectrum (space-separated integers): ").split()
+
+print("Score:", cyclopeptide_scoring(peptide, spectrum))
+
+
+""" 
+The mass_table dictionary stores the masses of amino acids.
+
+The cyclospectrum function calculates the cyclic spectrum of a given peptide. It starts by initializing a list prefix_masses with a 0 at the beginning. Then, it iterates over the characters in the peptide and calculates the prefix masses by summing the masses of the amino acids encountered so far. The total mass of the peptide is stored in peptide_mass. The function then generates the cyclic spectrum by taking the differences between consecutive prefix masses and also considering the cyclic peptide by subtracting the differences between the last and first prefix masses. The resulting cyclic spectrum is sorted and returned as a list.
+
+The cyclopeptide_scoring function calculates the score of a peptide against a given spectrum. It calls the cyclospectrum function to obtain the cyclic spectrum of the peptide. The spectrum is provided as a list of integers. The function then initializes a copy of the spectrum and a score counter. It iterates over the masses in the cyclic spectrum, checks if each mass is present in the spectrum copy, and increments the score if it is found.
+"""
