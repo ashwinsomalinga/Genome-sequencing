@@ -1,0 +1,111 @@
+def Trim(Leaderboard, Spectrum, N, Alphabet, AminoAcidMass):
+    """
+    Trims the leaderboard to the N highest-scoring linear peptides.
+
+    Args:
+        Leaderboard: A list of peptides.
+        Spectrum: A list of integers representing the spectrum.
+        N: The number of peptides to keep.
+        Alphabet: The alphabet of amino acids.
+        AminoAcidMass: A dictionary mapping amino acids to their masses.
+
+    Returns:
+        A list of the N highest-scoring linear peptides.
+    """
+
+    LinearScores = {}
+    for peptide in Leaderboard:
+        LinearScores[peptide] = LinearScore(peptide, Spectrum, Alphabet, AminoAcidMass)
+
+    # Sort the leaderboard based on the linear scores in descending order
+    Leaderboard.sort(key=lambda peptide: -LinearScores[peptide])
+
+    return ' '.join(Leaderboard[:N])
+
+
+def LinearScore(Peptide, Spectrum, Alphabet, AminoAcidMass):
+    """
+    Calculates the linear score of a peptide.
+
+    Args:
+        Peptide: A peptide.
+        Spectrum: A list of integers representing the spectrum.
+        Alphabet: The alphabet of amino acids.
+        AminoAcidMass: A dictionary mapping amino acids to their masses.
+
+    Returns:
+        The linear score of the peptide.
+    """
+
+    score = 0
+    spectrum_copy = Spectrum[:]  # Make a copy of the spectrum
+    for i in range(len(Peptide)):
+        mass = AminoAcidMass[Peptide[i]]
+        if mass in spectrum_copy:
+            score += 1
+            spectrum_copy.remove(mass)
+
+    return score
+
+
+# Sample Input
+leaderboard = input("Enter leaderboard peptides: ").split()
+spectrum = list(map(int, input("Enter spectrum: ").split()))
+N = int(input("Enter N: "))
+alphabet = set('ACDEFGHIKLMNPQRSTVWY')
+amino_acid_mass = {
+    'A': 71,
+    'C': 103,
+    'D': 115,
+    'E': 129,
+    'F': 147,
+    'G': 57,
+    'H': 137,
+    'I': 113,
+    'K': 128,
+    'L': 113,
+    'M': 131,
+    'N': 114,
+    'P': 97,
+    'Q': 128,
+    'R': 156,
+    'S': 87,
+    'T': 101,
+    'V': 99,
+    'W': 186,
+    'Y': 163
+}
+
+trimmed_leaderboard = Trim(leaderboard, spectrum, N, alphabet, amino_acid_mass)
+print(" ")
+print(trimmed_leaderboard)
+
+"""
+The Trim function takes five arguments: Leaderboard, Spectrum, N, Alphabet, and AminoAcidMass. It trims the leaderboard to the N highest-scoring linear peptides and returns the trimmed leaderboard.
+
+Inside the Trim function:
+a. We initialize an empty dictionary called LinearScores to store the linear scores of each peptide in the leaderboard.
+b. We iterate over each peptide in the Leaderboard and calculate its linear score using the LinearScore function. The linear score is then stored in the LinearScores dictionary with the peptide as the key.
+c. We sort the Leaderboard based on the linear scores in descending order. The key=lambda peptide: -LinearScores[peptide] specifies that the sorting should be done in descending order of the linear scores.
+d. Finally, we return the top N peptides from the sorted leaderboard by joining them with a space separator using the join function and returning the resulting string.
+
+The LinearScore function takes four arguments: Peptide, Spectrum, Alphabet, and AminoAcidMass. It calculates the linear score of a peptide and returns the score.
+
+Inside the LinearScore function:
+a. We initialize a variable called score to keep track of the linear score.
+b. We make a copy of the Spectrum list to ensure that the original spectrum is not modified.
+c. We iterate over each amino acid in the Peptide.
+d. For each amino acid, we retrieve its mass from the AminoAcidMass dictionary.
+e. If the mass is present in the spectrum_copy, we increment the score by 1 and remove the mass from the spectrum_copy.
+f. After iterating through all the amino acids, we return the final score.
+
+In the main program:
+a. We prompt the user to enter the leaderboard peptides, spectrum, and N using the input function.
+b. The split function is used to split the entered strings into a list of peptides and a list of integers representing the spectrum.
+c. The int function is used to convert the entered N value to an integer.
+d. The alphabet and amino_acid_mass dictionaries are defined as before.
+e. We call the Trim function with the provided inputs and store the result in trimmed_leaderboard.
+f. Finally, we print the trimmed leaderboard as the sample output.
+
+Overall, the code takes input from the user in the specified format, performs the trimming of the leaderboard, and outputs the trimmed leaderboard in the desired format.
+"""
