@@ -1,0 +1,85 @@
+# A dictionary containing the mass values of amino acids
+mass_table = {
+    'G': 57,
+    'A': 71,
+    'S': 87,
+    'P': 97,
+    'V': 99,
+    'T': 101,
+    'C': 103,
+    'I': 113,
+    'L': 113,
+    'N': 114,
+    'D': 115,
+    'K': 128,
+    'Q': 128,
+    'E': 129,
+    'M': 131,
+    'H': 137,
+    'F': 147,
+    'R': 156,
+    'Y': 163,
+    'W': 186
+}
+
+def linear_spectrum(peptide):
+    """
+    Compute the linear spectrum of a peptide.
+
+    Args:
+        peptide: An amino acid string.
+
+    Returns:
+        A list of integers representing the linear spectrum of the peptide.
+    """
+    prefix_masses = [0]
+    for i in range(len(peptide)):
+        prefix_masses.append(prefix_masses[i] + mass_table[peptide[i]])
+
+    linear_spec = [0]
+    for i in range(len(prefix_masses) - 1):
+        for j in range(i + 1, len(prefix_masses)):
+            linear_spec.append(prefix_masses[j] - prefix_masses[i])
+
+    linear_spec.sort()
+    return linear_spec
+
+def linear_score(peptide, spectrum):
+    """
+    Compute the linear score of a peptide with respect to a spectrum.
+
+    Args:
+        peptide: An amino acid string.
+        spectrum: A list of integers representing an experimental spectrum.
+
+    Returns:
+        The linear score of the peptide with respect to the spectrum.
+    """
+    linear_spec = linear_spectrum(peptide)
+    spec_copy = list(map(int, spectrum))
+    score = 0
+    for mass in linear_spec:
+        if mass in spec_copy:
+            score += 1
+            spec_copy.remove(mass)
+    return score
+
+# Prompt the user to enter the peptide and spectrum
+peptide = input("Enter the peptide: ")
+spectrum = input("Enter the spectrum (space-separated integers): ").split()
+
+# Convert spectrum to a list of integers
+spectrum = list(map(int, spectrum))
+
+# Compute and print the linear score
+print("Linear Score:", linear_score(peptide, spectrum))
+
+"""
+The code calculates the linear score of a peptide based on a given spectrum. It consists of two functions:
+
+linear_spectrum: This function computes the linear spectrum of a peptide. It takes an amino acid string (peptide) as input and returns a list of integers representing the linear spectrum. The linear spectrum is calculated by generating prefix masses and computing the differences between them.
+
+linear_score: This function calculates the linear score of a peptide with respect to a spectrum. It takes a peptide (amino acid string) and a spectrum (list of integers) as input. The linear score is determined by comparing the linear spectrum of the peptide with the experimental spectrum. Each matching mass contributes to the score, and the function returns the final score.
+
+The program prompts the user to enter the peptide and spectrum. The spectrum input is split into individual integers and stored as a list. Then, the linear_score function is called with the peptide and spectrum inputs, and the resulting linear score is printed as the output.
+"""
