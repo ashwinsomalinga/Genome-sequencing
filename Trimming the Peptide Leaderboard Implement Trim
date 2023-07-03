@@ -1,0 +1,150 @@
+# A dictionary containing the mass values of amino acids
+mass_table = {
+    'G': 57,
+    'A': 71,
+    'S': 87,
+    'P': 97,
+    'V': 99,
+    'T': 101,
+    'C': 103,
+    'I': 113,
+    'L': 113,
+    'N': 114,
+    'D': 115,
+    'K': 128,
+    'Q': 128,
+    'E': 129,
+    'M': 131,
+    'H': 137,
+    'F': 147,
+    'R': 156,
+    'Y': 163,
+    'W': 186
+}
+
+def linear_spectrum(peptide):
+    """
+    Compute the linear spectrum of a peptide.
+
+    Args:
+        peptide: An amino acid string.
+
+    Returns:
+        A list of integers representing the linear spectrum of the peptide.
+    """
+    prefix_masses = [0]
+    for i in range(len(peptide)):
+        prefix_masses.append(prefix_masses[i] + mass_table[peptide[i]])
+
+    linear_spec = [0]
+    for i in range(len(prefix_masses) - 1):
+        for j in range(i + 1, len(prefix_masses)):
+            linear_spec.append(prefix_masses[j] - prefix_masses[i])
+
+    linear_spec.sort()
+    return linear_spec
+
+def linear_score(peptide, spectrum):
+    """
+    Compute the linear score of a peptide with respect to a spectrum.
+
+    Args:
+        peptide: An amino acid string.
+        spectrum: A list of integers representing an experimental spectrum.
+
+    Returns:
+        The linear score of the peptide with respect to the spectrum.
+    """
+    linear_spec = linear_spectrum(peptide)
+    spec_copy = list(map(int, spectrum))
+    score = 0
+    for mass in linear_spec:
+        if mass in spec_copy:
+            score += 1
+            spec_copy.remove(mass)
+    return score
+
+def trim_leaderboard(leaderboard, spectrum, n):
+    scores = []
+    for peptide in leaderboard:
+        score = linear_score(peptide, spectrum)
+        scores.append(score)
+
+    leaderboard_scores = list(zip(leaderboard, scores))
+    leaderboard_scores.sort(key=lambda x: x[1], reverse=True)
+    leaderboard_scores = leaderboard_scores[:n]
+
+    for i in range(n, len(leaderboard_scores)):
+        if leaderboard_scores[i][1] < leaderboard_scores[n-1][1]:
+            leaderboard_scores = leaderboard_scores[:i]
+            break
+
+    leaderboard = [x[0] for x in leaderboard_scores]
+    return leaderboard
+
+
+# Read input from standard input
+leaderboard = input("Enter the peptides in Leaderboard: ").split()
+spectrum = input("Enter the spectrum (space-separated integers): ").split()
+n = int(input("Enter the value of N: "))
+
+# Convert spectrum to a list of integers
+spectrum = list(map(int, spectrum))
+
+# Call the trim_leaderboard function
+trimmed_leaderboard = trim_leaderboard(leaderboard, spectrum, n)
+
+# Print the trimmed leaderboard
+print("Trimmed Leaderboard:")
+print(" ".join(trimmed_leaderboard))  # Print the peptides separated by a space
+
+"""
+Create a dictionary called mass_table that contains the mass values of amino acids. Each amino acid is represented by a single-letter code, and its mass is assigned as a value in the dictionary.
+
+Define a function called linear_spectrum that calculates the linear spectrum of a peptide. The linear spectrum is a list of integers representing the masses of all possible subpeptides of the given peptide.
+
+Define a function called linear_score that calculates the linear score of a peptide with respect to a given spectrum. The linear score is the count of how many masses in the linear spectrum of the peptide match the given spectrum.
+
+Define a function called trim_leaderboard that takes a leaderboard (a list of peptides), a spectrum (a list of integers), and an integer n as inputs. This function trims the leaderboard to contain only the top n highest-scoring peptides based on their linear scores with respect to the spectrum.
+
+a. Initialize an empty list called scores to store the linear scores of each peptide in the leaderboard.
+
+b. Iterate over each peptide in the leaderboard:
+
+Calculate the linear score of the peptide by calling the linear_score function.
+
+Append the linear score to the scores list.
+
+c. Combine each peptide in the leaderboard with its corresponding score using the zip function and create a list of tuples called leaderboard_scores.
+
+d. Sort the leaderboard_scores list based on the scores in descending order.
+
+e. Keep only the top n peptides in the leaderboard_scores list.
+
+f. Iterate over the remaining peptides in the leaderboard_scores list starting from the n+1 index:
+
+If the score of the current peptide is less than the score of the nth peptide, truncate the leaderboard_scores list up to the current index and break out of the loop.
+g. Extract the peptides from the leaderboard_scores list and store them in the leaderboard list.
+
+h. Return the trimmed leaderboard.
+
+Read input from the user:
+
+Prompt the user to enter the peptides in the leaderboard as a space-separated string and split it into a list using the split() function.
+
+Prompt the user to enter the spectrum as a space-separated string and split it into a list of integers using the split() function and map() function.
+
+Prompt the user to enter the value of n as an integer.
+
+Convert the spectrum input to a list of integers.
+
+Call the trim_leaderboard function with the leaderboard, spectrum, and n as arguments and store the result in the trimmed_leaderboard variable.
+
+Print the trimmed leaderboard:
+
+Output the text "Trimmed Leaderboard:" to indicate the start of the leaderboard.
+
+Iterate over each peptide in the trimmed_leaderboard list and print each peptide on a separate line using a loop and the print() function.
+
+By following this workflow, the code reads the input provided by the user, performs the trimming operation using the trim_leaderboard function, and prints the trimmed leaderboard in the desired format.
+"""
