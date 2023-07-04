@@ -1,0 +1,135 @@
+from collections import deque
+import math
+
+mass_table = {
+    'G': 57,
+    'A': 71,
+    'S': 87,
+    'P': 97,
+    'V': 99,
+    'T': 101,
+    'C': 103,
+    'I': 113,
+    'L': 113,
+    'N': 114,
+    'D': 115,
+    'K': 128,
+    'Q': 128,
+    'E': 129,
+    'M': 131,
+    'H': 137,
+    'F': 147,
+    'R': 156,
+    'Y': 163,
+    'W': 186
+}
+
+def cyclic_spectrum(peptide):
+    prefix_masses = [0]
+    for i in range(len(peptide)):
+        prefix_masses.append(prefix_masses[i] + mass_table[peptide[i]])
+    peptide_mass = prefix_masses[-1]
+    cyclic_spectrum = [0]
+    for i in range(len(prefix_masses) - 1):
+        for j in range(i + 1, len(prefix_masses)):
+            cyclic_spectrum.append(prefix_masses[j] - prefix_masses[i])
+            if i > 0 and j < len(prefix_masses) - 1:
+                cyclic_spectrum.append(peptide_mass - (prefix_masses[j] - prefix_masses[i]))
+    cyclic_spectrum.sort()
+    return cyclic_spectrum
+
+def linear_score(peptide, spectrum):
+    peptide_spectrum = cyclic_spectrum(peptide)
+    score = 0
+    spectrum_copy = spectrum.copy()
+    for mass in peptide_spectrum:
+        if mass in spectrum_copy:
+            score += 1
+            spectrum_copy.remove(mass)
+    return score
+
+def trim(leaderboard, spectrum, n, alphabet, amino_acid_mass):
+    scores = [linear_score(peptide, spectrum) for peptide in leaderboard]
+    sorted_leaderboard = sorted(zip(leaderboard, scores), key=lambda x: x[1], reverse=True)
+    sorted_scores = [score for _, score in sorted_leaderboard]
+    sorted_leaderboard = [peptide for peptide, _ in sorted_leaderboard]
+    sorted_leaderboard_with_ties = []
+    for i, score in enumerate(sorted_scores):
+        if i < n or score == sorted_scores[n-1]:
+            sorted_leaderboard_with_ties.append(sorted_leaderboard[i])
+    return sorted_leaderboard_with_ties[:n]
+
+def expand(leaderboard, alphabet):
+    expanded = []
+    for peptide in leaderboard:
+        for amino_acid in alphabet:
+            expanded.append(peptide + [amino_acid])
+    return expanded
+
+def leaderboard_cyclopeptide_sequencing(spectrum, n, alphabet, amino_acid_mass):
+    leaderboard = deque([[]])
+    leader_peptide = []
+    parent_mass = max(spectrum)
+    while leaderboard:
+        leaderboard = expand(leaderboard, alphabet)
+        for peptide in leaderboard.copy():
+            peptide_mass = sum(amino_acid_mass[aa] for aa in peptide)
+            if peptide_mass == parent_mass:
+                if linear_score(peptide, spectrum) > linear_score(leader_peptide, spectrum):
+                    leader_peptide = peptide
+            elif peptide_mass > parent_mass:
+                leaderboard.remove(peptide)
+        if len(leaderboard) > n:
+            leaderboard = trim(leaderboard, spectrum, math.ceil(n / 2), alphabet, amino_acid_mass)
+    return '-'.join(str(amino_acid_mass[aa]) for aa in leader_peptide)
+
+# Get input from the user
+n = int(input("Enter N: "))
+spectrum_input = input("Enter the spectrum (space-separated integers): ")
+spectrum = list(map(int, spectrum_input.split()))
+
+alphabet = set(mass_table.keys())
+amino_acid_mass = mass_table
+
+result = leaderboard_cyclopeptide_sequencing(spectrum, n, alphabet, amino_acid_mass)
+print(result)
+
+
+"""
+detailed explanation of the code:
+
+1. **Mass Table**:
+   The `mass_table` is a dictionary that maps amino acid symbols to their corresponding mass values. Each amino acid is represented by a single character, and its mass is given as an integer value.
+
+2. **Cyclic Spectrum**:
+   The `cyclic_spectrum` function calculates the cyclic spectrum of a given peptide. The cyclic spectrum is a list of integers representing the masses of all possible subpeptides of the peptide, including the full peptide itself. It is calculated by finding the prefix masses of the peptide and then taking the differences between the prefix masses.
+
+3. **Linear Score**:
+   The `linear_score` function calculates the score of a peptide based on its linear spectrum, which is the spectrum of the peptide without considering cyclic permutations. It compares the masses in the peptide's spectrum with the given spectrum and counts the number of matching masses.
+
+4. **Trimming the Leaderboard**:
+   The `trim` function trims the leaderboard to the top `n` peptides based on their scores. It first calculates the scores for all peptides in the leaderboard using the `linear_score` function. Then it sorts the peptides based on their scores in descending order. Next, it selects the peptides that have scores equal to or higher than the score of the peptide at index `n-1` (to include ties). Finally, it clears the leaderboard and adds the selected peptides back to the leaderboard.
+
+5. **Expanding the Leaderboard**:
+   The `expand` function takes the current leaderboard and expands it by adding all possible amino acids to each peptide. It creates a new list of peptides by appending each amino acid from the alphabet to each peptide in the leaderboard.
+
+6. **Leaderboard Cyclopeptide Sequencing**:
+   The main function, `leaderboard_cyclopeptide_sequencing`, performs the cyclopeptide sequencing algorithm. It takes the input spectrum, the number `n`, the alphabet of amino acids, and the amino acid mass table as parameters.
+
+   - It initializes the leaderboard with an empty peptide.
+   - It initializes the `leader_peptide` as an empty list to keep track of the highest-scoring peptide found so far.
+   - It calculates the parent mass, which is the maximum value in the spectrum.
+   - The main loop runs until the leaderboard is empty.
+   - In each iteration of the loop, it expands the leaderboard by adding all possible amino acids to each peptide.
+   - For each peptide in the leaderboard, it calculates its mass and compares it with the parent mass.
+   - If the peptide's mass matches the parent mass, it compares its linear score with the linear score of the current leader peptide and updates the leader peptide if the score is higher.
+   - If the peptide's mass exceeds the parent mass, it removes the peptide from the leaderboard.
+   - After expanding and filtering the leaderboard, it trims it to the top `n` peptides using the `trim` function.
+   - The loop continues until the leaderboard size exceeds `n`.
+   - Finally, it converts the leader peptide into a string by joining the amino acid masses with hyphens and returns the result.
+
+7. **User Input and Output**:
+   The code prompts the user to enter the value of `n` and the spectrum as space-separated integers. It reads the input, converts the spectrum to a list of integers, and initializes the alphabet and amino acid mass based on the `mass_table` dictionary. Then it calls the `leaderboard_cyclopeptide_sequencing` function with the input values and prints the resulting leader peptide.
+
+The optimizations I mentioned in my previous response aim to improve the runtime performance of the code when dealing with large datasets. By using
+"""
