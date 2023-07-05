@@ -1,0 +1,44 @@
+class SpectralConvolution:
+    def __init__(self):
+        self._input()
+        result = self.convolutionList(self.spectrum)
+        result = self.removeZeroes(result)
+        print(' '.join([str(s) for s in result]))
+
+    def _input(self):
+        self.spectrum = sorted([int(s) for s in input().strip().split()])
+
+    def convolutionList(self, spectrum):
+        l = len(spectrum)
+        cList = []
+        for i in range(l):
+            for j in range(i + 1, l):
+                a = spectrum[j] - spectrum[i]
+                if a != 0:
+                    cList.append(a)
+        return cList
+
+    def removeZeroes(self, convList):
+        return [x for x in convList if x != 0]
+
+if __name__ == "__main__":
+    SpectralConvolution()
+"""
+The code defines a class named SpectralConvolution, which will encapsulate the functionality related to solving the problem.
+
+In the __init__ method, the code calls the _input method to read the input spectrum and store it in the self.spectrum variable. This input spectrum is assumed to be a collection of integers in increasing order.
+
+The _input method reads a line of input from the user, strips any leading/trailing whitespace, splits the line into individual numbers, converts them to integers, and stores them in the self.spectrum variable. The spectrum is sorted in ascending order using the sorted function.
+
+The convolutionList method takes the spectrum as input and computes the convolution list. The convolution list is a list of differences between pairs of elements from the spectrum. The method uses two nested loops to iterate over all pairs of elements and calculates the difference a = spectrum[j] - spectrum[i]. If the difference is not zero, it appends it to the cList list.
+
+The removeZeroes method takes the computed convolution list as input and removes any occurrences of zero from the list. It does this by using a list comprehension to create a new list that includes only the elements from the original list that are not equal to zero.
+
+Back in the __init__ method, the code calls the convolutionList method with the input spectrum to compute the convolution list. It then passes the computed list to the removeZeroes method to remove any zeroes.
+
+Finally, the code prints the elements of the convolution list separated by a space using the print function and the join method of a string.
+
+The if __name__ == "__main__" block ensures that the code is executed only when the script is run directly, not when it is imported as a module.
+
+To use this code, you can run it in a Python environment. When prompted, input the spectrum as a space-separated list of integers. The code will compute the convolution list and print the result.
+"""
