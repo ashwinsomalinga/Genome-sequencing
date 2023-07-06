@@ -1,0 +1,35 @@
+class SpectralConvolution:
+    def __init__(self):
+        self._input()
+        result = self.convolutionList(self.spectrum)
+        result = self.removeZeroes(result)
+        max_element, max_count = self.findMaxMultiplicity(result)
+        print(max_element)
+
+    def _input(self):
+        self.spectrum = sorted([int(s) for s in input().strip().split()])
+
+    def convolutionList(self, spectrum):
+        l = len(spectrum)
+        cList = []
+        for i in range(l):
+            for j in range(i + 1, l):
+                a = spectrum[j] - spectrum[i]
+                if a != 0:
+                    cList.append(a)
+        return cList
+
+    def removeZeroes(self, convList):
+        return [x for x in convList if x != 0]
+
+    def findMaxMultiplicity(self, convList):
+        count_dict = {}
+        for x in convList:
+            count_dict[x] = count_dict.get(x, 0) + 1
+        max_count = max(count_dict.values())
+        max_elements = [x for x in count_dict if count_dict[x] == max_count]
+        return max_elements[0], max_count
+
+
+if __name__ == "__main__":
+    SpectralConvolution()
