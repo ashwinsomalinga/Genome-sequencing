@@ -1,0 +1,128 @@
+def read_spectrum():
+    M = int(input())
+    N = int(input())
+    spectrum = [int(x) for x in input().split()]
+    return M, N, spectrum
+
+def spectral_convolution(spectrum, M):
+    convolution_dict = {}
+    for i in range(len(spectrum)):
+        for j in range(i + 1, len(spectrum)):
+            diff = spectrum[j] - spectrum[i]
+            if 57 <= diff <= 200:
+                convolution_dict[diff] = convolution_dict.get(diff, 0) + 1
+    sorted_convolution = sorted(convolution_dict.items(), key=lambda x: x[1], reverse=True)
+    convolution_masses = [int(x[0]) for x in sorted_convolution[:M]]
+    return convolution_masses
+
+def expand(peptides, mass_list):
+    expanded_peptides = []
+    if len(peptides) == 0:
+        for mass in mass_list:
+            expanded_peptides.append([mass])
+    else:
+        for peptide in peptides:
+            for mass in mass_list:
+                new_peptide = peptide + [mass]
+                expanded_peptides.append(new_peptide)
+    return expanded_peptides
+
+def cyclic_spectrum(peptide):
+    prefix_masses = [0]
+    for i in range(len(peptide)):
+        prefix_masses.append(prefix_masses[i] + peptide[i])
+    peptide_mass = prefix_masses[-1]
+    spectrum = [0]
+    for i in range(len(prefix_masses) - 1):
+        for j in range(i + 1, len(prefix_masses)):
+            spectrum.append(prefix_masses[j] - prefix_masses[i])
+            if i > 0 and j < len(prefix_masses) - 1:
+                spectrum.append(peptide_mass - (prefix_masses[j] - prefix_masses[i]))
+    spectrum.sort()
+    return spectrum
+
+def consistent_cyclospectrum(peptide, spectrum):
+    peptide_spectrum = cyclic_spectrum(peptide)
+    spectrum_dict = {}
+    for mass in spectrum:
+        spectrum_dict[mass] = spectrum_dict.get(mass, 0) + 1
+    for mass in peptide_spectrum:
+        if mass not in spectrum_dict or spectrum_dict[mass] == 0:
+            return False
+        spectrum_dict[mass] -= 1
+    return True
+
+def trim(leaderboard, spectrum, N):
+    scores = [linear_score(peptide, spectrum) for peptide in leaderboard]
+    sorted_leaderboard = sorted(zip(leaderboard, scores), key=lambda x: x[1], reverse=True)
+    sorted_scores = [score for _, score in sorted_leaderboard]
+    sorted_leaderboard = [peptide for peptide, _ in sorted_leaderboard]
+    sorted_leaderboard_with_ties = []
+    for i, score in enumerate(sorted_scores):
+        if i < N or score == sorted_scores[N-1]:
+            sorted_leaderboard_with_ties.append(sorted_leaderboard[i])
+    return sorted_leaderboard_with_ties[:N]
+
+def linear_score(peptide, spectrum):
+    peptide_spectrum = cyclic_spectrum(peptide)
+    score = 0
+    spectrum_dict = {}
+    for mass in spectrum:
+        spectrum_dict[mass] = spectrum_dict.get(mass, 0) + 1
+    for mass in peptide_spectrum:
+        if mass in spectrum_dict and spectrum_dict[mass] > 0:
+            score += 1
+            spectrum_dict[mass] -= 1
+    return score
+
+def leaderboard_cyclopeptide_sequencing(M, N, spectrum):
+    leaderboard = [[]]
+    leader_peptide = []
+    parent_mass = max(spectrum)
+    while leaderboard:
+        leaderboard = expand(leaderboard, convolution_masses)
+        leaderboard_copy = leaderboard.copy()
+        for peptide in leaderboard_copy:
+            if sum(peptide) == parent_mass:
+                if linear_score(peptide, spectrum) >= linear_score(leader_peptide, spectrum):
+                    leader_peptide = peptide
+            elif sum(peptide) > parent_mass:
+                leaderboard.remove(peptide)
+        leaderboard = trim(leaderboard, spectrum, N)
+    leader_peptide_str = '-'.join([str(mass) for mass in leader_peptide])
+    return leader_peptide_str
+
+# Read input
+M, N, spectrum = read_spectrum()
+
+# Compute convolution of spectrum
+convolution_masses = spectral_convolution(spectrum, M)
+
+# Find cyclic peptide sequence using leaderboard algorithm
+leader_peptide = leaderboard_cyclopeptide_sequencing(M, N, spectrum)
+
+# Print the result
+print(leader_peptide)
+
+
+"""
+read_spectrum(): This function reads the input values from the user. It prompts the user for two integers, M and N, followed by a list of integers representing the spectrum. It returns the values of M, N, and the spectrum as a tuple.
+
+spectral_convolution(spectrum, M): This function computes the convolution of the spectrum. It iterates over the elements of the spectrum and calculates the difference between every pair of elements. If the difference falls between 57 and 200, it counts the frequency of each difference value in a dictionary called convolution_dict. The function then sorts the dictionary items based on their frequencies in descending order and selects the top M elements. Finally, it returns a list of the selected convolution masses.
+
+expand(peptides, mass_list): This function expands a list of peptides by adding all possible masses from a given mass list to each peptide. It is used to generate all possible extensions of a peptide in the leaderboard algorithm. If the peptides list is empty, it initializes the expanded peptides list by appending each mass from the mass list as a single-element peptide. If the peptides list is not empty, it iterates over each peptide and each mass in the mass list, creating a new peptide by appending the mass to the existing peptide. The function returns the expanded list of peptides.
+
+cyclic_spectrum(peptide): This function calculates the cyclic spectrum of a given peptide. It computes the prefix masses of the peptide by iteratively summing up the amino acid masses. It then constructs the spectrum by calculating the mass differences between every pair of prefix masses and their complements. The spectrum is sorted in ascending order and returned as a list.
+
+consistent_cyclospectrum(peptide, spectrum): This function checks if a peptide's cyclic spectrum is consistent with a given experimental spectrum. It calculates the cyclic spectrum of the peptide using the cyclic_spectrum() function and creates a dictionary to store the frequencies of the masses in the spectrum. It then iterates over the masses in the peptide spectrum and checks if each mass is present in the spectrum dictionary and has a positive frequency. If a mass is missing or has a frequency of zero, the function returns False, indicating inconsistency. Otherwise, it returns True.
+
+trim(leaderboard, spectrum, N): This function trims the leaderboard to the top N peptides based on their scores. It calculates the scores for each peptide in the leaderboard by calling the linear_score() function. The leaderboard is sorted based on the scores in descending order. The function then selects the top N peptides from the sorted leaderboard, including ties if necessary, and returns the trimmed leaderboard.
+
+linear_score(peptide, spectrum): This function calculates the linear score of a peptide based on how many masses from the peptide's linear spectrum match the experimental spectrum. It computes the linear spectrum of the peptide using the cyclic_spectrum() function. It initializes a score variable to zero and creates a dictionary to store the frequencies of the masses in the spectrum. It then iterates over the masses in the peptide spectrum and checks if each mass is present in the spectrum dictionary and has a positive frequency. If a mass is found, the score is incremented by one, and the frequency of that mass in the spectrum dictionary is decremented. The final score is returned.
+
+leaderboard_cyclopeptide_sequencing(M, N, spectrum): This function implements the leaderboard algorithm to find the cyclopeptide sequence. It starts with an empty leaderboard containing anempty list. The maximum mass value in the spectrum is determined and stored as parent_mass. The function enters a while loop that continues as long as the leaderboard is not empty. In each iteration, the leaderboard is expanded by calling the expand() function with the leaderboard and convolution_masses. Then, a copy of the leaderboard is created for iteration purposes. For each peptide in the copy, it checks if the sum of the peptide's masses is equal to parent_mass. If it is, it compares the linear score of the current peptide with the linear score of the leader peptide. If the current peptide has a higher score or the same score as the leader peptide, the leader peptide is updated with the current peptide. If the sum of the peptide's masses is greater than parent_mass, the peptide is removed from the leaderboard. After iterating over all peptides, the leaderboard is trimmed using the trim() function with the spectrum and N. The resulting trimmed leaderboard contains the top N peptides. Finally, the masses of the leader peptide are joined with hyphens and returned as a string.
+
+The main part of the code reads the input values using the read_spectrum() function. It computes the convolution of the spectrum using the spectral_convolution() function. Then, it calls the leaderboard_cyclopeptide_sequencing() function with the computed values to find the cyclic peptide sequence. The resulting sequence is printed as the output.
+
+In summary, this code implements the ConvolutionCyclopeptideSequencing algorithm to find a cyclic peptide sequence based on an experimental spectrum. It involves calculating the convolution of the spectrum, expanding the leaderboard, computing the cyclic spectrum and linear score of peptides, and using the leaderboard algorithm with trimming to find the top N peptides.
+"""
